@@ -1,0 +1,5 @@
+<network>
+  <name>fuel-net-1</name>
+  <bridge name="virbr101" />
+  <ip address="172.16.0.1" netmask="255.255.255.0" />
+</network>

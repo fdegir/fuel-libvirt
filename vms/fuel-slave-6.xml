@@ -1,0 +1,102 @@
+<domain type='kvm' id='36'>
+  <name>fuel-slave-6</name>
+  <uuid>ad8db999-7fed-777e-08a4-5513c6ddc886</uuid>
+  <memory unit='KiB'>1572864</memory>
+  <currentMemory unit='KiB'>1572864</currentMemory>
+  <vcpu placement='static'>1</vcpu>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
+  <os>
+    <type arch='x86_64' machine='pc-i440fx-trusty'>hvm</type>
+    <boot dev='network'/>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>destroy</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm-spice</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='raw'/>
+      <source file='#VM_VOLUME#'/>
+      <target dev='hda' bus='ide'/>
+      <alias name='ide0-0-0'/>
+      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+    </disk>
+    <controller type='usb' index='0'>
+      <alias name='usb0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/>
+    </controller>
+    <controller type='pci' index='0' model='pci-root'>
+      <alias name='pci.0'/>
+    </controller>
+    <controller type='ide' index='0'>
+      <alias name='ide0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
+    </controller>
+    <interface type='network'>
+      <mac address='52:54:00:2a:19:1b'/>
+      <source network='fuel-net-0'/>
+      <target dev='vnet0'/>
+      <model type='virtio'/>
+      <alias name='net0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
+    </interface>
+    <interface type='network'>
+      <mac address='52:54:00:19:a5:bb'/>
+      <source network='fuel-net-1'/>
+      <target dev='vnet1'/>
+      <model type='virtio'/>
+      <alias name='net1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
+    </interface>
+    <interface type='network'>
+      <mac address='52:54:00:d5:58:f1'/>
+      <source network='fuel-net-2'/>
+      <target dev='vnet2'/>
+      <model type='virtio'/>
+      <alias name='net2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
+    </interface>
+    <serial type='pty'>
+      <source path='/dev/pts/18'/>
+      <target port='0'/>
+      <alias name='serial0'/>
+    </serial>
+    <console type='pty' tty='/dev/pts/18'>
+      <source path='/dev/pts/18'/>
+      <target type='serial' port='0'/>
+      <alias name='serial0'/>
+    </console>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+    <graphics type='vnc' port='5900' autoport='yes' listen='127.0.0.1'>
+      <listen type='address' address='127.0.0.1'/>
+    </graphics>
+    <sound model='ich6'>
+      <alias name='sound0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
+    </sound>
+    <video>
+      <model type='cirrus' vram='9216' heads='1'/>
+      <alias name='video0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+    </video>
+    <memballoon model='virtio'>
+      <alias name='balloon0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
+    </memballoon>
+  </devices>
+  <seclabel type='dynamic' model='apparmor' relabel='yes'>
+    <label>libvirt-ad8db999-7fed-777e-08a4-5513c6ddc886</label>
+    <imagelabel>libvirt-ad8db999-7fed-777e-08a4-5513c6ddc886</imagelabel>
+  </seclabel>
+</domain>
+
