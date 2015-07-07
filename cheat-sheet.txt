@@ -1,0 +1,194 @@
+- Steps to follow to get Mirantis Fuel deployed using libvirt:
+
+1. Create pool for storage, mark for autostart, start, get info and finally list pools
+    virsh pool-define-as --name fuel --type dir --target /work/libvirt/pool/fuel
+    virsh pool-autostart fuel
+    virsh pool-start fuel
+    virsh pool-info fuel
+    virsh pool-list
+
+2. Create volumes for fuel master and slaves, get info, and finally list all volumes
+    virsh vol-create-as --name fuel-master.img --pool fuel --format raw --capacity 30G
+    virsh vol-info --pool fuel fuel-master.img
+
+    virsh vol-create-as --name fuel-slave-1.img --pool fuel --format raw --capacity 30G
+    virsh vol-info --pool fuel fuel-slave-1.img
+
+    virsh vol-create-as --name fuel-slave-2.img --pool fuel --format raw --capacity 30G
+    virsh vol-info --pool fuel fuel-slave-2.img
+
+    virsh vol-create-as --name fuel-slave-3.img --pool fuel --format raw --capacity 30G
+    virsh vol-info --pool fuel fuel-slave-3.img
+
+    virsh vol-list --pool fuel
+
+3. Create networks fuel-net-0, fuel-net-1, fuel-net-2, and fuel-net-nat, mark for autostart, and start them
+    virsh net-define --file fuel-net-0.xml
+    virsh net-autostart fuel-net-0
+    virsh net-start fuel-net-0
+    virsh net-info fuel-net-0
+
+    virsh net-define --file fuel-net-1.xml
+    virsh net-autostart fuel-net-1
+    virsh net-start fuel-net-1
+    virsh net-info fuel-net-1
+
+    virsh net-define --file fuel-net-2.xml
+    virsh net-autostart fuel-net-2
+    virsh net-start fuel-net-2
+    virsh net-info fuel-net-2
+
+    virsh net-define --file fuel-net-nat.xml
+    virsh net-autostart fuel-net-nat
+    virsh net-start fuel-net-nat
+    virsh net-info fuel-net-nat
+
+4. Create fuel master
+    virsh create fuel-master.xml
+    virsh define fuel-master.xml
+    virsh change-media fuel-master hdc --insert /work/iso/MirantisOpenStack-6.0.iso
+    virsh start fuel-master
+
+5. Wait for fuel master installation and eject the media until we succeed
+    virsh change-media fuel-master hdc --eject
+    virsh send-key fuel-master KEY_ENTER
+
+6. Create fuel slaves and start them - they should be discovered by fuel-master
+    virsh create fuel-slave-1.xml
+    virsh define fuel-slave-1.xml
+    virsh start fuel-slave-1
+
+    virsh create fuel-slave-2.xml
+    virsh define fuel-slave-2.xml
+    virsh start fuel-slave-2
+
+    virsh create fuel-slave-3.xml
+    virsh define fuel-slave-3.xml
+    virsh start fuel-slave-3
+
+7. Deploy OpenStack
+    Either using Fuel GUI or via fuel cli
+
+- Frequently used libvirt commands
+
+1. Help commands
+- Get help for an command
+    virsh help <command>
+
+2. Pool commands
+- List pools
+    virsh pool-list [--all|--inactive|--active]
+
+- Create persistent pool, mark as autostart, start
+    virsh pool-define-as --name <pool_name> --type <dir|raw> --target <path_to_pool>
+    virsh pool-autostart <pool_name>
+    virsh pool-start <pool_name>
+
+- Get pool info
+    virsh pool-info <pool_name>
+    virsh pool-dumpxml <pool_name>
+
+- Delete pool
+    virsh pool-destroy <pool_name>
+    virsh pool-undefine <pool_name>
+
+- Set autostart for pools
+    virsh pool-autostart --pool <pool_name>
+
+3. Volume commands
+- List volumes
+    virsh vol-list --pool <pool_name>
+
+- Create volume
+    virsh vol-create-as --name <volume_name> --pool <pool_name> --format <raw|qcow2>--capacity <capacity_in_bytes|capacity_in_Gbytes>
+
+- Delete volume
+    virsh vol-delete --pool <pool_name> <volume_name>
+
+- Get volume info
+    virsh vol-info --pool <pool_name> <volume_name>
+    virsh vol-dumpxml --pool <pool_name> <volume_name>
+
+4. Network commands
+- List networks
+    virsh net-list
+
+- Network info
+    virsh net-info <network_name>
+
+- Remove network
+    virsh net-destroy <network_name>
+
+- Create transient network from XML
+    virsh net-create --file <file>
+
+- Create persistent network from XML
+    virsh net-define --file <file>
+
+- Mark network to autostart
+    virsh net-autostart <network_name>
+
+- Start network
+    virsh net-start <network_name>
+
+
+5. Guest commands (guest == domain)
+- List guests
+    virsh list [--all|--inactive|--state-running]
+
+- Get guest info
+    virsh dominfo <guest_name>
+
+- Create guest and make it persistent
+    virsh create <path_to_xml>
+    virsh define <path_to_xml>
+
+- Change the boot order
+    virsh edit <guest_name>
+
+- Reboot the guest
+    virsh destroy <guest_name>
+
+- Change the media
+    virsh change-media <guest_name> <device> [--insert|--eject] --source <path_to_media>
+
+- Send keys to the guest
+    virsh send-key <guest_name> <keycode>
+
+    virsh send-key fuel-master KEY_Y
+    virsh send-key fuel-master KEY_ENTER
+
+- Eject the media
+    virsh change-media --eject
+
+- Delete guest
+    virsh destroy <vm_name>
+    virsh undefine <vm_name>
+    virsh vol-delete --pool <pool_name> <vm_name>
+
+- Frequently used fuel commands
+
+1. List environments
+    fuel env
+
+2. Create a new environment
+    fuel env create --name <name_of_env> --rel <id_of_env>
+    fuel env create --name fuel1 --rel 1
+
+    This creates the env in multinode mode and nova network.
+    Env parameters can also be supplied.
+
+    fuel env create --name fuel-auto --rel 1 --mode multinode --net neutron --nst vlan
+
+3. List nodes
+    fuel node
+
+4. Assign nodes to environment with specific roles
+    fuel node set --env <id_of_env> --node <id_of_node> ---role <controller|compute|cinder>
+
+    fuel node set --env 3 --node 1 --role controller
+
+5. Deploy changes
+    fuel deploy-changes --env <id_of_env>
+
+    fuel deploy-changes --env 3
