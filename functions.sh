@@ -71,9 +71,6 @@ create_networks() {
 # delete the pool if exists, create the directory for it,
 # define new pool, mark it for autostart and start the pool
 create_pool() {
-    # create the directory for the pool if it doesn't exist already
-    [[ -d $POOL_TARGET ]] || mkdir -p $POOL_TARGET
-
     # create the pool
     virsh pool-info $POOL_NAME >& /dev/null 2>&1
     if [[ "$?" != "0" ]]; then
@@ -81,6 +78,7 @@ create_pool() {
                              --type $POOL_TYPE \
                              --target $POOL_TARGET >& /dev/null 2>&1
 
+        virsh pool-build $POOL_NAME
         virsh pool-autostart $POOL_NAME >& /dev/null 2>&1
         virsh pool-start $POOL_NAME >& /dev/null 2>&1
     else
